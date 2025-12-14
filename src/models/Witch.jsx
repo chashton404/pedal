@@ -89,7 +89,15 @@ const playAction = (name, loopOnce = false) => {
   return (
     <group ref={group} dispose={null} position={[0, 0, 0]} scale={2}>
       <group ref={wheelsRef}>
-        <Wheels speed={speed} inputTurn={inputTurn} driftPower={driftPower} jumpOffset={jumpOffset} wheelPRY={wheelPRY} backWheelOffset={backWheelOffset} />
+        <Wheels 
+          speed={speed} 
+          inputTurn={inputTurn} 
+          driftDirection={driftDirection}
+          driftPower={driftPower} 
+          jumpOffset={jumpOffset} 
+          wheelPRY={wheelPRY} 
+          backWheelOffset={backWheelOffset} 
+        />
       </group>
       <group ref={sceneRef} name="Scene">
         <group name="rig">

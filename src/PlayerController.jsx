@@ -71,8 +71,8 @@ export const PlayerController = () => {
           if (driftDirection.current !== 0) {
             gsap.killTweensOf(backWheelOffset.current);
             gsap.to(backWheelOffset.current, {
-              left: driftDirection.current === driftDirections.left ? 0.4 : 0,
-              right: driftDirection.current === driftDirections.right ? 0.4 : 0,
+              left: driftDirection.current === driftDirections.left ? 0.2 : 0,
+              right: driftDirection.current === driftDirections.right ? 0.2 : 0,
               duration: 0.3,
               ease: "power4.out",
               onComplete: () => {

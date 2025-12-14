@@ -13,7 +13,7 @@ export const Sparks = forwardRef(({ left }, ref) => {
 
   const texture = useTexture("/textures/particles/alpha.png");
 
-  const particleCount = 200;
+  const particleCount = 300;
   const positions = [];
   const colors = [];
   const sizes = [];
@@ -35,7 +35,7 @@ export const Sparks = forwardRef(({ left }, ref) => {
     directions.push(
       (1 + Math.random() * 20) * (left ? 1 : -1),
       Math.random() * 10,
-      -Math.random() * 20
+      Math.random() * 20
     );
     timeOffsets.push(1 + Math.random() * 3);
   }
@@ -59,10 +59,10 @@ export const Sparks = forwardRef(({ left }, ref) => {
       vertexShader,
       fragmentShader,
       vertexColors: true,
-      transparent: true,
+      // transparent: true,
       depthWrite: false,
       depthTest: false,
-      blending: AdditiveBlending,
+      // blending: AdditiveBlending,
     });
   }, [texture]);
 
@@ -89,8 +89,8 @@ export const Sparks = forwardRef(({ left }, ref) => {
   }));
 
   return (
-    <group position={[0, 0, 0]} layers={1}>
-      <points ref={pointsRef} geometry={particles.current} material={material} layers={1} />
+    <group position={[0, 0, 0]}>
+      <points ref={pointsRef} geometry={particles.current} material={material} />
     </group>
   );
 });

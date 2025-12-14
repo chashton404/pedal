@@ -72,5 +72,5 @@ export const Skid = () => {
     });
   });
 
-  return <instancedMesh2 layers={1} renderOrder={1} ref={ref} args={[geometry, material, { createEntities: true }]} frustumCulled={false} />;
+  return <instancedMesh2 renderOrder={1} ref={ref} args={[geometry, material, { createEntities: true }]} frustumCulled={false} />;
 };

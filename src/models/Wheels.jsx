@@ -4,16 +4,22 @@ Command: npx gltfjsx@6.5.3 --transform wheel.glb
 Files: wheel.glb [328.66KB] > C:\Users\mouli\mk3\public\models\wheel-transformed.glb [26.7KB] (92%)
 */
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { damp } from "three/src/math/MathUtils.js";
 import { Raycaster, Vector3 } from "three";
+import { Sparks } from "../particles/sparks/Sparks";
+import { Glow } from "../particles/drift/glow/Glow";
+import { Skate } from "../particles/drift/Skate/Skate";
+import { Trails } from "../particles/sparks/Trails";
+import { getDriftLevel } from "../constants";
+import { useGameStore } from "../store";
 
 const raycaster = new Raycaster();
 const direction = new Vector3(0, -1, 0);
 
-export function Wheels({ speed, inputTurn, driftPower, jumpOffset, backWheelOffset, wheelPRY }) {
+export function Wheels({ speed, inputTurn, driftDirection, driftPower, jumpOffset, backWheelOffset, wheelPRY }) {
   const { nodes, materials } = useGLTF("./models/wheel-transformed.glb");
   const wheel3 = useRef(null);
   const wheel2 = useRef(null);
@@ -27,8 +33,29 @@ export function Wheels({ speed, inputTurn, driftPower, jumpOffset, backWheelOffs
   const wheel2Base = useRef(null);
   const wheel3Base = useRef(null);
 
+  const sparksLeftRef = useRef(null);
+  const sparksRightRef = useRef(null);
+  const glow1Ref = useRef(null);
+  const glow2Ref = useRef(null);
+  const skate1Ref = useRef(null);
+  const skate2Ref = useRef(null);
+
+  const leftParticles = useRef(null);
+  const rightParticles = useRef(null);
+
+  const isDriftingRef = useRef(false);
+
+  const setBoostPower = useGameStore((state) => state.setBoostPower);
+  const setDriftLevel = useGameStore((state) => state.setDriftLevel);
 
   const scene = useThree((state) => state.scene);
+
+  useEffect(() => {
+    if (glow1Ref.current && glow2Ref.current) {
+      glow1Ref.current.setOpacity(0);
+      glow2Ref.current.setOpacity(0);
+    }
+  }, []);
 
   function getGroundPosition(wheelBase, wheel, offset = 0, wheelIndex, delta) {
     const origin = new Vector3();
@@ -55,13 +82,10 @@ export function Wheels({ speed, inputTurn, driftPower, jumpOffset, backWheelOffs
   }
 
   function getWheelPositions() {
-    const wheelPositions = [wheel0, wheel1, wheel2, wheel3].map(
-      (wheel, index) => {
-        const position = wheel.current.getWorldPosition(new Vector3());
-        const localPos = wheel.current.position;
-        return position;
-      }
-    );
+    const wheelPositions = [wheel0, wheel1, wheel2, wheel3].map((wheel) => {
+      const position = wheel.current.getWorldPosition(new Vector3());
+      return position;
+    });
     return wheelPositions;
   }
 
@@ -81,6 +105,42 @@ export function Wheels({ speed, inputTurn, driftPower, jumpOffset, backWheelOffs
 
     frontWheels.current.rotation.y = yRotation.current;
   };
+
+  function animateDriftParticles(isDrifting, driftLevel) {
+    // Only update state when isDrifting changes (like Kart.jsx)
+    if (isDrifting !== isDriftingRef.current) {
+      isDriftingRef.current = isDrifting;
+      if (isDrifting) {
+        
+        sparksLeftRef?.current?.setEmitState(true);
+        sparksRightRef?.current?.setEmitState(true);
+        glow1Ref?.current?.setOpacity(1);
+        glow2Ref?.current?.setOpacity(1);
+        skate1Ref?.current?.setOpacity(1);
+        skate2Ref?.current?.setOpacity(1);
+      } else {
+        sparksLeftRef?.current?.setEmitState(false);
+        sparksRightRef?.current?.setEmitState(false);
+        glow1Ref?.current?.setOpacity(0);
+        glow2Ref?.current?.setOpacity(0);
+        skate1Ref?.current?.setOpacity(0);
+        skate2Ref?.current?.setOpacity(0);
+      }
+    }
+
+    // Update colors/levels while drifting
+    if (isDrifting) {
+      glow1Ref?.current?.setColor(driftLevel.color);
+      glow2Ref?.current?.setColor(driftLevel.color);
+      glow1Ref?.current?.setLevel(driftLevel.threshold);
+      glow2Ref?.current?.setLevel(driftLevel.threshold);
+      sparksLeftRef?.current?.setColor(driftLevel.color);
+      sparksRightRef?.current?.setColor(driftLevel.color);
+    }
+
+    setDriftLevel(driftLevel);
+    setBoostPower(driftLevel.threshold / 2);
+  }
 
   const stickWheelsToGround = (delta) => {
     getGroundPosition(
@@ -125,14 +185,34 @@ export function Wheels({ speed, inputTurn, driftPower, jumpOffset, backWheelOffs
     const averageYPos = 0.15 + (a.y + b.y + c.y + d.y) / 7;
     wheelPRY.current = [pitch, roll, averageYPos + jumpOffset.current * 0.1];
   }
-  useFrame(({}, delta) => {
+
+  useFrame((_, delta) => {
     rotateWheels(delta);
     stickWheelsToGround(delta);
     const wheelPositions = getWheelPositions();
     moveAndRotateKart(wheelPositions);
+
+    // Use the same condition as Kart.jsx: drift only when direction is set AND landed
+    const isDrifting = !!driftDirection.current && jumpOffset.current === 0;
+    const driftLevel = getDriftLevel(driftPower.current);
+    animateDriftParticles(isDrifting, driftLevel);
+
+    // Update particle group positions to follow wheel0 and wheel1 in real time
+    leftParticles.current.position.set(
+      wheel0.current.position.x - 0.1,
+      wheel0.current.position.y - 0.1,
+      wheel0.current.position.z + 0.1
+    );
+    rightParticles.current.position.set(
+      wheel1.current.position.x + 0.1,
+      wheel1.current.position.y - 0.1,
+      wheel1.current.position.z + 0.1
+    );
   });
+
   return (
     <group dispose={null}>
+      {/* Back wheels */}
       <mesh
         name="wheel"
         castShadow
@@ -155,6 +235,28 @@ export function Wheels({ speed, inputTurn, driftPower, jumpOffset, backWheelOffs
         rotation={[Math.PI, Math.PI, Math.PI]}
         scale={0.522}
       />
+
+      {/* Drift particle effects - positioned relative to back wheels */}
+      <group>
+        <group ref={leftParticles}>
+          <Glow ref={glow1Ref} driftDirection={driftDirection} />
+          <Sparks ref={sparksLeftRef} />
+          <Trails />
+          <group scale={0.5} position={[0.11, 0.13, 0.1]}>
+            <Skate ref={skate1Ref} />
+          </group>
+        </group>
+        <group ref={rightParticles}>
+          <Glow ref={glow2Ref} driftDirection={driftDirection} />
+          <Sparks ref={sparksRightRef} left={true} />
+          <Trails left={true} />
+          <group scale={0.5} position={[-0.11, 0.13, 0.1]}>
+            <Skate ref={skate2Ref} />
+          </group>
+        </group>
+      </group>
+
+      {/* Front wheels */}
       <group ref={frontWheels}>
         <mesh
           name="wheel"
@@ -179,6 +281,8 @@ export function Wheels({ speed, inputTurn, driftPower, jumpOffset, backWheelOffs
           scale={0.45}
         />
       </group>
+
+      {/* Wheel base positions for raycasting */}
       <group ref={wheel0Base} position={[-0.35, -0.079, 0.35]} />
       <group ref={wheel1Base} position={[0.35, -0.079, 0.35]} />
       <group ref={wheel2Base} position={[-0.35, -0.095, -0.37]} />

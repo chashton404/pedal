@@ -25,7 +25,7 @@ export const KartDust = ({ wheelStates }) => {
 
   return (
     <>
-    <group layers={1} position-y={0.5}>
+    <group position-y={0.5}>
             {wheelStates.map((wheel, i) => (
         <Dust key={i} ref={(el) => (dustRefs.current[i] = el)} />
       ))}

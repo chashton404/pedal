@@ -39,7 +39,7 @@ export const Skate = forwardRef((props, ref) => {
   const size = 0.7;
 
   return (
-    <mesh layers={1} material={material}>
+    <mesh renderOrder={1} material={material} rotation-y={Math.PI}>
       <planeGeometry args={[size / 2, size + 0.2, 1, 10]} />
     </mesh>
   );

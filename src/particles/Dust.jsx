@@ -22,7 +22,7 @@ export const Dust = forwardRef(({ position }, ref) => {
   }, [position]);
 
   return (
-    <group ref={groupRef} layers={1}>
+    <group ref={groupRef}>
     <VFXEmitter
       ref={dustRef}
       emitter="dust"

@@ -33,9 +33,9 @@ export const Glow = forwardRef(({ driftDirection }, ref) => {
   
   useFrame((state) => {
     if (material) {
-      material.uniforms.time.value = state.clock.getElapsedTime() * 1.3;
+      material.uniforms.time.value = state.clock.getElapsedTime() * 2;
     
-      material.uniforms.xDisplacement.value = -(driftDirection.current) * 0.3;
+      material.uniforms.xDisplacement.value = -(driftDirection.current) * 0.1;
       if(noiseTexture === null){
         noiseTexture = useGameStore.getState().noiseTexture;
         material.uniforms.noiseTexture.value = noiseTexture;
@@ -74,11 +74,11 @@ export const Glow = forwardRef(({ driftDirection }, ref) => {
   });
   
 
-  const size = 0.1;
+  const size = 0.07;
 
   return (
-    <Billboard layers={1}>
-      <mesh layers={1} material={material}>
+    <Billboard >
+      <mesh material={material}>
         <circleGeometry args={[size, 22]} />
       </mesh>
       <Spark ref={sparkRef}/>
