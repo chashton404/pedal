@@ -2,7 +2,7 @@ import { Kart } from "./models/Kart";
 import { useKeyboardControls, OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useRef, useEffect } from "react";
-import { Vector3 } from "three";
+import { Vector3, MeshBasicMaterial } from "three";
 import { damp } from "three/src/math/MathUtils.js";
 import { kartSettings } from "./constants";
 import { useGameStore } from "./store";
@@ -12,6 +12,11 @@ import VFXEmitter from "./wawa-vfx/VFXEmitter";
 import { Model } from "./models/Witch";
 import { me } from "playroomkit";
 import { buildCollider, checkCollision, kartColliderSettings } from "./utils/KartCollision";
+import { MeshBVHHelper } from "three-mesh-bvh";
+
+// Check for debug mode in URL (?debug)
+const isDebugMode = typeof window !== "undefined" && window.location.search.includes("debug");
+if (isDebugMode) console.log("🔧 Debug mode enabled - collision visualization active");
 
 export const PlayerController = () => {
   const rbRef = useRef(null);
@@ -58,6 +63,7 @@ export const PlayerController = () => {
   // Collision system
   const colliderRef = useRef(null);
   const colliderBuilt = useRef(false);
+  const bvhHelperRef = useRef(null);
   const { scene } = useThree();
 
   // Build collider from scene walls
@@ -91,13 +97,38 @@ export const PlayerController = () => {
           scene.add(collider);
           colliderBuilt.current = true;
           console.log("Kart collision enabled with", wallMeshes.length, "wall meshes");
+
+          // Debug mode: Add BVH helper and make collider visible
+          if (isDebugMode) {
+            collider.visible = true;
+            collider.material = new MeshBasicMaterial({
+              color: 0xff0000,
+              wireframe: true,
+              transparent: true,
+              opacity: 0.3,
+            });
+
+            // Add BVH helper to visualize the bounding volume hierarchy
+            const bvhHelper = new MeshBVHHelper(collider, 10);
+            bvhHelper.color.set(0x00ff00);
+            scene.add(bvhHelper);
+            bvhHelperRef.current = bvhHelper;
+            console.log("Debug: BVH helper added");
+          }
         }
       } else {
         console.log("No wall meshes found for collision. Name meshes with 'wall', 'barrier', 'fence', 'border', or 'collision'");
       }
     }, 1000);
 
-    return () => clearTimeout(buildTimer);
+    return () => {
+      clearTimeout(buildTimer);
+      // Cleanup BVH helper on unmount
+      if (bvhHelperRef.current) {
+        scene.remove(bvhHelperRef.current);
+        bvhHelperRef.current = null;
+      }
+    };
   }, [scene]);
 
   const getGamepad = () => {
@@ -412,6 +443,19 @@ export const PlayerController = () => {
             inputTurn={inputTurn}
           /> */}
           <Model speed={speedRef} driftDirection={driftDirection} driftPower={driftPower} jumpOffset={jumpOffset} backWheelOffset={backWheelOffset} inputTurn={inputTurn} />
+
+          {/* Debug: Show player collision capsule */}
+          {isDebugMode && (
+            <mesh position={[0, (kartColliderSettings.radius + kartColliderSettings.height) / 2, 0]}>
+              <capsuleGeometry args={[
+                kartColliderSettings.radius,
+                kartColliderSettings.height - kartColliderSettings.radius * 2,
+                4,
+                16
+              ]} />
+              <meshBasicMaterial color={0x00ffff} wireframe transparent opacity={0.5} />
+            </mesh>
+          )}
 
           <group ref={cameraLookAtRef} position={[0, -2, -9]}></group>
         </group>
