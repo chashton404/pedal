@@ -10,6 +10,7 @@ import gsap from "gsap";
 import { useTouchScreen } from "./hooks/useTouchScreen";
 import VFXEmitter from "./wawa-vfx/VFXEmitter";
 import { Model } from "./models/Witch";
+import { me } from "playroomkit";
 
 export const PlayerController = () => {
   const rbRef = useRef(null);
@@ -232,6 +233,12 @@ export const PlayerController = () => {
     setPlayerPosition(player.position);
   }
 
+  const updatePlayroomState = () =>{
+    if(me()){
+      me().setState("position", playerRef.current.position )
+    }
+  }
+
   useFrame((state, delta) => {
     if (!playerRef.current && !rbRef.current) return;
     const player = playerRef.current;
@@ -266,6 +273,7 @@ export const PlayerController = () => {
     jumpPlayer(isJumpPressed, left, right, joystick.x || gamepadButtons.x);
     driftPlayer(delta);
     getGamepad();
+    updatePlayroomState();
   });
 
   return (
