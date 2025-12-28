@@ -7,7 +7,7 @@ import { kartSettings } from "./constants";
 import { useGameStore } from "./store";
 import gsap from "gsap";
 import { useTouchScreen } from "./hooks/useTouchScreen";
-import { Model } from "./models/Witch";
+import { Kart } from "./models/Kart";
 import { buildCollider, checkCollision, kartColliderSettings } from "./utils/KartCollision";
 import { MeshBVHHelper } from "three-mesh-bvh";
 
@@ -328,7 +328,7 @@ export const PlayerController = () => {
 
 {/* <OrbitControls/> */}
         <group ref={kartRef}>
-          <Model speed={speedRef} jumpOffset={jumpOffset} inputTurn={inputTurn} />
+          <Kart speed={speedRef} jumpOffset={jumpOffset} inputTurn={inputTurn} />
 
           {/* Debug: Show player collision capsule */}
           {isDebugMode && (
