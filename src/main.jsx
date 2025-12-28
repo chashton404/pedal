@@ -2,12 +2,10 @@ import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { WebGPUCanvas } from './WebGPUCanvas.jsx'
-import { MobileControls } from './mobile/MobileControls.jsx'
 
 createRoot(document.getElementById('root')).render(
 
-    <div className='canvas-container'>
-      <MobileControls/>
+  <div className='canvas-container'>
       <Suspense fallback={false}>
       <WebGPUCanvas />
       </Suspense>

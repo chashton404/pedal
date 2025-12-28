@@ -6,7 +6,6 @@ import { damp } from "three/src/math/MathUtils.js";
 import { kartSettings } from "./constants";
 import { useGameStore } from "./store";
 import gsap from "gsap";
-import { useTouchScreen } from "./hooks/useTouchScreen";
 import { Kart } from "./models/Kart";
 import { buildCollider, checkCollision, kartColliderSettings } from "./utils/KartCollision";
 import { MeshBVHHelper } from "three-mesh-bvh";
@@ -36,8 +35,6 @@ export const PlayerController = () => {
   const collisionStunTimer = useRef(0); // Remaining stun time
   const COLLISION_STUN_DURATION = 1.5; // Seconds
   const COLLISION_BOUNCE_SPEED = -15; // Negative = backwards
-
-  const isTouchScreen = useTouchScreen();
 
   const setPlayerPosition = useGameStore((state) => state.setPlayerPosition);
   const setIsBoosting = useGameStore((state) => state.setIsBoosting);
@@ -161,11 +158,7 @@ export const PlayerController = () => {
       gamepadButtons.forward = gamepadRef.current.buttons[0].pressed;
       gamepadButtons.backward = gamepadRef.current.buttons[1].pressed;
     }
-    const forwardAccel = Number(
-      (isTouchScreen && !gamepadRef.current) ||
-        forward ||
-        gamepadButtons.forward
-    );
+    const forwardAccel = Number(forward || gamepadButtons.forward);
 
     speedRef.current = damp(
       speedRef.current,
@@ -177,7 +170,7 @@ export const PlayerController = () => {
     setSpeed(speedRef.current);
   }
 
-  function rotatePlayer(left, right, player, joystickX, delta) {
+  function rotatePlayer(left, right, player, delta) {
     const gamepadJoystick = {
       x: 0,
     };
@@ -187,10 +180,7 @@ export const PlayerController = () => {
     }
 
     inputTurn.current =
-      (-gamepadJoystick.x -
-        joystickX +
-        (Number(left) - Number(right))) *
-      0.1;
+      (-gamepadJoystick.x + (Number(left) - Number(right))) * 0.1;
 
     rotationSpeedRef.current = damp(
       rotationSpeedRef.current,
@@ -296,9 +286,6 @@ export const PlayerController = () => {
 
     if (!player || !cameraGroup || !kart) return;
 
-    const joystick = useGameStore.getState().joystick;
-    const jumpButtonPressed = useGameStore.getState().jumpButtonPressed;
-
     const { forward, backward, left, right, jump } = get();
 
     const gamepadButtons = {
@@ -313,9 +300,9 @@ export const PlayerController = () => {
       gamepadButtons.x = gamepadRef.current.axes[0];
     }
     updateSpeed(forward, backward, delta);
-    rotatePlayer(left, right, player, joystick.x, delta);
+    rotatePlayer(left, right, player, delta);
     updatePlayer(player, speedRef.current, camera, kart, delta);
-    const isJumpPressed = jumpButtonPressed || jump || gamepadButtons.jump;
+    const isJumpPressed = jump || gamepadButtons.jump;
     jumpPlayer(isJumpPressed);
     getGamepad();
   });
