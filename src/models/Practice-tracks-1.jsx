@@ -6,14 +6,29 @@ Files: practice-tracks-1.glb [105.53KB] > /Users/chaseashton/Developer/Mario-Kar
 
 import React from 'react'
 import { useGLTF } from '@react-three/drei'
+import { useGameStore } from "../store";
 
-export function Model(props) {
-  const { nodes, materials } = useGLTF('/practice-tracks-1-transformed.glb')
+export function Track(props) {
+  const { nodes, materials } = useGLTF('/models/practice-tracks-1-transformed.glb')
+  const trackRef = useRef(null);
+  const setTrackScene = useGameStore((s) => s.setTrackScene);
+
+  useEffect(() => {
+    if (trackRef.current) setTrackScene?.(trackRef.current);
+  }, [setTrackScene]);
+
   return (
-    <group {...props} dispose={null}>
-      <mesh castShadow receiveShadow geometry={nodes.BézierCircle.geometry} material={nodes.BézierCircle.material} />
+    <group {...props} dispose={null} position={[0,0,0]} scale={1}>
+      <mesh 
+        ref={tracker}
+        layers={1}
+        name="ground"
+        castShadow 
+        receiveShadow 
+        geometry={nodes.BézierCircle.geometry} 
+        material={nodes.BézierCircle.material} />
     </group>
   )
 }
 
-useGLTF.preload('/practice-tracks-1-transformed.glb')
+useGLTF.preload('./models/practice-tracks-1-transformed.glb')
