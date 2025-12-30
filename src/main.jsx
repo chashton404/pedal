@@ -6,9 +6,10 @@ import { WebGPUCanvas } from './WebGPUCanvas.jsx'
 createRoot(document.getElementById('root')).render(
 
   <div className='canvas-container'>
+    {/* The suspense is what is shown while a the WebGPUCanvas loads */}
       <Suspense fallback={false}>
       <WebGPUCanvas />
       </Suspense>
-      <div className="version">v0.3.4</div>
+      <div className="version">Mario Kart Trainer - v0.0.0</div>
     </div>
 )
