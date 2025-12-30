@@ -5,7 +5,6 @@ import { Vector3 } from "three";
 import { damp } from "three/src/math/MathUtils.js";
 import { kartSettings } from "./constants";
 import { useGameStore } from "./store";
-import gsap from "gsap";
 import { Kart } from "./models/Kart";
 
 
@@ -15,9 +14,7 @@ export const PlayerController = () => {
   const cameraGroupRef = useRef(null);
   const cameraLookAtRef = useRef(null);
   const kartRef = useRef(null);
-  const jumpIsHeld = useRef(false);
   const jumpOffset = useRef(0);
-  const isJumping = useRef(false);
   const gamepadRef = useRef(null);
   const inputTurn = useRef(0);
 
@@ -40,19 +37,6 @@ export const PlayerController = () => {
         setGamepad(gamepadRef.current);
       }
     }
-  };
-
-  const jumpAnim = () => {
-    gsap.to(jumpOffset, {
-      current: 0.3,
-      duration: 0.125,
-      ease: "power2.out",
-      yoyo: true,
-      repeat: 1,
-      onComplete: () => {
-        isJumping.current = false;
-      },
-    });
   };
 
   function updateSpeed(forward, backward, delta) {
@@ -105,22 +89,6 @@ export const PlayerController = () => {
         kartSettings.speed.max;
 
     player.rotation.y = damp(player.rotation.y, targetRotation, 8, delta);
-  }
-
-  // MORE JUMPING STUFF
-
-  function jumpPlayer(spaceKey) {
-    if (spaceKey && !jumpIsHeld.current && !isJumping.current) {
-      // rb.applyImpulse({ x: 0, y: 45, z: 0 }, true);
-
-      jumpAnim();
-      isJumping.current = true;
-      jumpIsHeld.current = true;
-    }
-
-    if (!spaceKey) {
-      jumpIsHeld.current = false;
-    }
   }
 
   function updatePlayer(player, speed, camera, kart, delta) {
@@ -177,24 +145,18 @@ export const PlayerController = () => {
 
     if (!player || !cameraGroup || !kart) return;
 
-    const { forward, backward, left, right, jump } = get();
+    const { forward, backward, left, right } = get();
 
     const gamepadButtons = {
-      jump: false,
       x: 0,
     };
 
     if (gamepadRef.current) {
-      gamepadButtons.jump =
-        gamepadRef.current.buttons[5].pressed ||
-        gamepadRef.current.buttons[7].pressed;
       gamepadButtons.x = gamepadRef.current.axes[0];
     }
     updateSpeed(forward, backward, delta);
     rotatePlayer(left, right, player, delta);
     updatePlayer(player, speedRef.current, camera, kart, delta);
-    const isJumpPressed = jump || gamepadButtons.jump;
-    jumpPlayer(isJumpPressed);
     getGamepad();
   });
 
