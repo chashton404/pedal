@@ -166,11 +166,12 @@ export function Kart({ speed, jumpOffset, inputTurn }) {
   });
 
   return (
+
     <group
       key={progress}
       ref={groupRef}
       dispose={null}
-      position-y={-0.5}
+      position-y={-.5}
       scale={1}
       rotation-y={Math.PI}
     >
@@ -243,8 +244,6 @@ export function Kart({ speed, jumpOffset, inputTurn }) {
           layers={1}
         />
       </group>
-
-      {/* <mesh castShadow receiveShadow geometry={nodes.shape.geometry} material={materials['default']} /> */}
     </group>
   );
 }

@@ -162,19 +162,15 @@ export const PlayerController = () => {
 
   return (
     <>
-      <group></group>
-      <group ref={playerRef}>
+      <group ref={playerRef} position={[-30, 0, 50]}>
         <group ref={cameraGroupRef} position={[0, 1, 5]}></group>
 
-{/* <OrbitControls/> */}
         <group ref={kartRef}>
           <Kart speed={speedRef} jumpOffset={jumpOffset} inputTurn={inputTurn} />
 
           <group ref={cameraLookAtRef} position={[0, -2, -9]}></group>
         </group>
       </group>
-
-      {/* <OrbitControls/> */}
     </>
   );
 };

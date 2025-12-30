@@ -1,5 +1,5 @@
 import { Environment, Lightformer, Sky } from "@react-three/drei";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useGameStore } from "../store";
 import { useFrame } from "@react-three/fiber";
 import { EnvironmentSphere } from "./EnvironmentSphere";
@@ -8,6 +8,14 @@ import { CameraHelper } from "three";
 
 export const Lighting = () => {
   const directionalLight = useRef(null)
+
+useEffect(() => {
+  if (directionalLight.current) {
+    directionalLight.current.layers.enable(1);
+    directionalLight.current.target.layers.enable(1);
+  }
+}, []);
+
   
   useFrame(() => {
 
