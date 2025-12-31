@@ -1,7 +1,7 @@
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import { Vector3 } from "three";
+import { CatmullRomCurve3, Vector3 } from "three";
 import { damp } from "three/src/math/MathUtils.js";
 import { kartSettings } from "./constants";
 import { useGameStore } from "./store";
@@ -16,6 +16,11 @@ export const PlayerController = () => {
   const kartRef = useRef(null);
   const gamepadRef = useRef(null);
   const inputTurn = useRef(0);
+
+  //Here we create our spline
+  const pathRef = useRef(new CatmullRomCurve3([new Vector3(-30,0,50), new Vector3(-30, 0, -360)], false, "centripetal"))
+  const pathLengthRef = useRef(pathRef.current.getLength())
+  const progressRef = useRef(0)
 
   const [, get] = useKeyboardControls();
 
@@ -88,49 +93,28 @@ export const PlayerController = () => {
     player.rotation.y = damp(player.rotation.y, targetRotation, 8, delta);
   }
 
-  function updatePlayer(player, speed, camera, kart, delta) {
-    const desiredDirection = new Vector3(
-      -Math.sin(player.rotation.y),
-      0,
-      -Math.cos(player.rotation.y)
-    );
-
-    smoothedDirectionRef.current.lerp(desiredDirection, 12 * delta);
-    const dir = smoothedDirectionRef.current;
-
-    const angle = Math.atan2(
-      desiredDirection.x * dir.z - desiredDirection.z * dir.x,
-      desiredDirection.x * dir.x + desiredDirection.z * dir.z
-    );
-
-    kart.rotation.y = damp(
-      kart.rotation.y,
-      angle * 1.3,
-      6,
-      delta
-    );
-
+  function updatePlayer(player, speed, camera, kart, delta, inputDirection) {
+    // Advance along the path based on input (W/S) and current speed; clamp between start and end
+    const path = pathRef.current;
+    const pathLength = pathLengthRef.current || 1;
+    const deltaProgress = inputDirection * (Math.abs(speed) / pathLength) * delta;
+    progressRef.current = Math.max(0, Math.min(1, progressRef.current + deltaProgress));
+  
+    // Sample the path: where the kart should be, and the forward direction to face
+    const point = path.getPointAt(progressRef.current);
+    const tangent = path.getTangentAt(progressRef.current).normalize();
+  
+    // Snap the kart’s transform to the path position and align facing to the tangent
+    player.position.copy(point);
+    const targetRotation = Math.atan2(-tangent.x, -tangent.z);
+    player.rotation.y = damp(player.rotation.y, targetRotation, 8, delta);
+    kart.rotation.y = damp(kart.rotation.y, 0, 6, delta); // keep body level
+  
+    // Keep camera following the kart smoothly
     camera.lookAt(kartRef.current.getWorldPosition(new Vector3()));
-    camera.position.lerp(
-      cameraGroupRef.current.getWorldPosition(new Vector3()),
-      24 * delta
-    );
-    
-
-    // const body = useGameStore.getState().body;
-    // if(body){
-    //   cameraGroupRef.current.position.y = lerp(cameraGroupRef.current.position.y, body.position.y + 2, 8 * delta);
-    //   cameraLookAtRef.current.position.y = body.position.y;
-    // }
-    const direction = smoothedDirectionRef.current;
-
-    // Calculate desired new position
-    const desiredX = player.position.x + direction.x * speed * delta;
-    const desiredZ = player.position.z + direction.z * speed * delta;
-    player.position.x = desiredX;
-    player.position.z = desiredZ;
-
-    // Clone so Zustand selector sees a new reference and re-renders HUD
+    camera.position.lerp(cameraGroupRef.current.getWorldPosition(new Vector3()), 10 * delta);
+  
+    // Publish position to the store (HUD/lighting)
     setPlayerPosition(player.position.clone());
   }
 
@@ -143,7 +127,9 @@ export const PlayerController = () => {
 
     if (!player || !cameraGroup || !kart) return;
 
-    const { forward, backward, left, right } = get();
+    const { forward, backward } = get();
+    let forwardInput = Number(forward)
+    let backwardInput = Number(backward)
 
     const gamepadButtons = {
       x: 0,
@@ -151,10 +137,14 @@ export const PlayerController = () => {
 
     if (gamepadRef.current) {
       gamepadButtons.x = gamepadRef.current.axes[0];
+      forwardInput = forwardInput || Number(gamepadRef.current.buttons[0].pressed)
+      backwardInput = backwardInput || Number(gamepadRef.current.button[1].pressed)
     }
+
+    const inputDirection = forwardInput - backwardInput;
+
     updateSpeed(forward, backward, delta);
-    rotatePlayer(left, right, player, delta);
-    updatePlayer(player, speedRef.current, camera, kart, delta);
+    updatePlayer(player, speedRef.current, camera, kart, delta, inputDirection);
     getGamepad();
   });
 
