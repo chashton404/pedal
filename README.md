@@ -14,10 +14,11 @@ Well aren't you just a nosey person? Jokes. My objective is to create a game tha
 ## TO - DO
 - [x] Get rid of drifing, multiplayer and collision logic
 - [x] Create a basic straight track
-- [ ] Wire up a spline on the straight track that the Kart will follow
-- [ ] Get the Kart to follow the spline
+- [x] Wire up a spline on the straight track that the Kart will follow
+- [x] Get the Kart to follow the spline
 - [ ] Add capability for bluetooth connection
 - [ ] Add logic to determine speed based on the bike pedaling
+- [ ] Switch the Kart model to be a bike
 - [ ] and work up from there!
 
 ## License
