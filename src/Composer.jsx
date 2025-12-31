@@ -7,16 +7,15 @@ extend({ ColorGrading });
 
 export const Composer = () => {
 
-
-
-
   return (
     <EffectComposer disableNormalPass multisampling={false}>
       <ColorGrading/>
 
-      <Bloom luminanceThreshold={0.} intensity={0.25} mipmapBlur />
-      {/* <TiltShift2 blur={0.1}/> */}
-      {/* <N8AO  aoRadius={50} distanceFalloff={0.2} intensity={40} screenSpaceRadius halfRes/> */}
+      <Bloom luminanceThreshold={0} intensity={0.25} mipmapBlur />
+
+      {/* These two lines add a slight blur */}
+      {/* <TiltShift2 blur={0.05}/> */}
+      {/* <N8AO  aoRadius={100} distanceFalloff={0.2} intensity={40} screenSpaceRadius halfRes/> */}
     </EffectComposer>
   );
 };
