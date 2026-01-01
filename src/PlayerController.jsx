@@ -2,6 +2,25 @@ import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import { CatmullRomCurve3, Vector3 } from "three";
+import { catmullRomPoints } from "./misc/trackPoints";
+import { useMemo } from "react";
+
+const thinPoints = (points, minDist = 1) => {
+  if (!points?.length) return [];
+  const thinned = [];
+  let lastKept = null;
+  for (const p of points) {
+    if (!lastKept || p.distanceTo(lastKept) >= minDist) {
+      thinned.push(p.clone());
+      lastKept = thinned[thinned.length - 1];
+    }
+  }
+  const lastOriginal = points[points.length - 1];
+  if (lastOriginal && lastKept && lastKept.distanceTo(lastOriginal) > 1e-6) {
+    thinned.push(lastOriginal.clone());
+  }
+  return thinned;
+};
 import { damp } from "three/src/math/MathUtils.js";
 import { kartSettings } from "./constants";
 import { useGameStore } from "./store";
@@ -10,6 +29,7 @@ import { Kart } from "./models/Kart";
 
 //useRef gives stable containers that persist across renders without causing rerenders when they change.
 export const PlayerController = () => {
+  const thinnedTrackPoints = useMemo(() => thinPoints(catmullRomPoints, 20), []);
   const playerRef = useRef(null);
   const cameraGroupRef = useRef(null);
   const cameraLookAtRef = useRef(null);
@@ -18,19 +38,7 @@ export const PlayerController = () => {
   const inputTurn = useRef(0);
 
   //Here we create our spline
-  const pathRef = useRef(new CatmullRomCurve3(
-    [
-      new Vector3(-30, 0, 50),    // start
-      new Vector3(-30, 0, -180),
-      new Vector3(-30, 0, -330),
-      new Vector3(-30, 0, -350),
-      new Vector3(80,  0, -420),  // bottom-right turn
-      new Vector3(220, 0, -360),
-      new Vector3(260, 0, -180),
-      new Vector3(220, 0, 50),
-      new Vector3(80,  0, 110),   // top-left turn
-      new Vector3(-30, 0, 60)
-    ], true, "centripetal"))
+  const pathRef = useRef(new CatmullRomCurve3(thinnedTrackPoints, true, "centripetal"))
   
   const pathLengthRef = useRef(pathRef.current.getLength())
   const progressRef = useRef(0)
