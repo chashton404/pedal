@@ -18,22 +18,41 @@ export const PlayerController = () => {
   const inputTurn = useRef(0);
 
   //Here we create our spline
-  const pathRef = useRef(new CatmullRomCurve3([new Vector3(-30,0,50), new Vector3(-30, 0, -360)], false, "centripetal"))
+  const pathRef = useRef(new CatmullRomCurve3(
+    [
+      new Vector3(-30, 0, 50),    // start
+      new Vector3(-30, 0, -180),  // straight
+      new Vector3(-30, 0, -360),  // end of straight
+      new Vector3(0,   0, -420),  // begin turn
+      new Vector3(80,  0, -420),  // apex of turn (swinging right)
+      new Vector3(140, 0, -360),  // exit turn
+      new Vector3(140, 0, -180),  // align to return
+      new Vector3(140, 0, 50),    // back up the parallel straight
+    ], false, "centripetal"))
+  
   const pathLengthRef = useRef(pathRef.current.getLength())
   const progressRef = useRef(0)
 
   const [, get] = useKeyboardControls();
 
+  //Speed Refs
   const speedRef = useRef(0);
   const rotationSpeedRef = useRef(0);
   const smoothedDirectionRef = useRef(new Vector3(0, 0, -1));
 
+  //Zustand Hooks
   const setPlayerPosition = useGameStore((state) => state.setPlayerPosition);
   const setSpeed = useGameStore((state) => state.setSpeed);
   const setGamepad = useGameStore((state) => state.setGamepad);
   const bikeWatts = useGameStore((state) => state.bikeWatts ?? 0);
   const bodyWeightKg = useGameStore((state) => state.bodyWeight ?? 75);
   const kPower = useGameStore((state) => state.kPower ?? 1);
+
+  //Camera Constants
+  const tmpEye = useRef(new Vector3());
+  const tmpTarget = useRef(new Vector3());
+  const toTarget = useRef(new Vector3());
+  const smoothedTarget = useRef(new Vector3());
 
   const getGamepad = () => {
     if (navigator.getGamepads) {
@@ -117,6 +136,7 @@ export const PlayerController = () => {
   }
 
   function updatePlayer(player, speed, camera, kart, delta, inputDirection) {
+
     // Advance along the path based on input (W/S) and current speed; clamp between start and end
     const path = pathRef.current;
     const pathLength = pathLengthRef.current || 1;
@@ -133,9 +153,23 @@ export const PlayerController = () => {
     player.rotation.y = damp(player.rotation.y, targetRotation, 8, delta);
     kart.rotation.y = damp(kart.rotation.y, 0, 6, delta); // keep body level
   
-    // Keep camera following the kart smoothly
-    camera.lookAt(kartRef.current.getWorldPosition(new Vector3()));
-    camera.position.lerp(cameraGroupRef.current.getWorldPosition(new Vector3()), 10 * delta);
+    //Constants for the camera
+    //Desired positions
+    const dersiredEye = cameraGroupRef.current.getWorldPosition(tmpEye.current);
+    const desiredTarget = kartRef.current.getWorldPosition(tmpTarget.current);
+    
+    // Smooth target with a clamped step
+    const maxStep = 1.5 //this can be tuned
+    toTarget.current.copy(desiredTarget).sub(smoothedTarget.current);
+    if (toTarget.current.length() > maxStep) {
+      toTarget.current.setLength(maxStep);
+    }
+    smoothedTarget.current.add(toTarget.current);
+
+    // Smooth eye
+    const t = Math.min(1, 5 * delta); // tune 5
+    camera.position.lerp(dersiredEye, t)
+    camera.lookAt(smoothedTarget.current);
   
     // Publish position to the store (HUD/lighting)
     setPlayerPosition(player.position.clone());
