@@ -30,12 +30,12 @@ export const useGameStore = create((set) => ({
   bikeCadence: null,
   setBikeCadence: (bikeCadence) => set({ bikeCadence }),
   // Weight Inputs
-  bodyWeight: 75,
+  bodyWeight: 68,
   setBodyWeight: (bodyWeight) => set({ bodyWeight }),
   // Power scaling
-  kPower: 3,
+  kPower: 100,
   setKPower: (kPower) => set({ kPower }),
-  // Orientation debug
-  yaw: 0,
-  setYaw: (yaw) => set({ yaw }),
+  // UI
+  showCoordinates: true,
+  setShowCoordinates: (showCoordinates) => set({ showCoordinates }),
 }));

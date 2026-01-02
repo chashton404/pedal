@@ -57,13 +57,13 @@ export const PlayerController = () => {
   const bikeWatts = useGameStore((state) => state.bikeWatts ?? 0);
   const bodyWeightKg = useGameStore((state) => state.bodyWeight ?? 75);
   const kPower = useGameStore((state) => state.kPower ?? 1);
-  const setYaw = useGameStore((state) => state.setYaw);
 
   //Camera Constants
   const tmpEye = useRef(new Vector3());
   const tmpTarget = useRef(new Vector3());
   const toTarget = useRef(new Vector3());
   const smoothedTarget = useRef(new Vector3());
+  const initializedCamera = useRef(false);
 
   const getGamepad = () => {
     if (navigator.getGamepads) {
@@ -169,7 +169,6 @@ export const PlayerController = () => {
 
     player.rotation.y = player.rotation.y + damp(0, angleDiff, 4, delta);
     kart.rotation.y = damp(kart.rotation.y, 0, 3, delta); // keep body level
-    setYaw(targetRotation);
   
     //Constants for the camera
     //Desired positions
@@ -201,6 +200,16 @@ export const PlayerController = () => {
     const camera = state.camera;
 
     if (!player || !cameraGroup || !kart) return;
+
+    if (!initializedCamera.current) {
+      // Snap camera to follow rig on first ready frame
+      const eye = cameraGroup.getWorldPosition(tmpEye.current);
+      const target = kart.getWorldPosition(tmpTarget.current);
+      smoothedTarget.current.copy(target);
+      camera.position.copy(eye);
+      camera.lookAt(target);
+      initializedCamera.current = true;
+    }
 
     const { forward, backward } = get();
     let forwardInput = Number(forward)

@@ -9,7 +9,6 @@ const wrapDiffU16 = (curr, prev) => (curr - prev + 65536) % 65536;
 export const BikeOverlay = () => {
   const [watts, setWatts] = useState(null);
   const [cadence, setCadence] = useState(null);
-  const [bodyWeightLbs, setBodyWeightLbs] = useState(170);
   const [status, setStatus] = useState("Not connected");
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -21,20 +20,14 @@ export const BikeOverlay = () => {
   //To update the bike data in store.js
   const updateWatts = useGameStore((state) => state.setBikeWatts);
   const updateCadence = useGameStore((state) => state.setBikeCadence);
-  const updateBodyWeight = useGameStore((state) => state.setBodyWeight);
-  const bodyWeightKg = useGameStore((state) => state.bodyWeight);
-  const kPower = useGameStore((state) => state.kPower);
-  const setKPower = useGameStore((state) => state.setKPower);
 
   const resetState = useCallback(() => {
     setIsConnected(false);
     setIsConnecting(false);
     setWatts(null);
     setCadence(null);
-    setBodyWeightLbs(170);
-    updateBodyWeight(170 * 0.453592);
     lastCrankRef.current = { revs: null, time: null };
-  }, [updateBodyWeight]);
+  }, []);
 
   const handleMeasurement = useCallback((event) => {
     const dv = event.target.value;
@@ -147,31 +140,11 @@ export const BikeOverlay = () => {
     }
   }, [onDisconnected]);
 
-  const handleBodyWeightChange = (weightChange) => {
-    const rawWeightlbs = weightChange.target.value;
-    setBodyWeightLbs(rawWeightlbs);
-    const weightLbs = Number(rawWeightlbs);
-    if (!isNaN(weightLbs) && rawWeightlbs !== "") {
-      const weightKilos = weightLbs * 0.453592;
-      updateBodyWeight(weightKilos);
-    }
-  };
-
-  const handleKPowerChange = (event) => {
-    const raw = event.target.value;
-    const val = Number(raw);
-    if (!Number.isNaN(val)) {
-      setKPower(val);
-    }
-  };
-
   useEffect(() => () => onDisconnected(), [onDisconnected]);
 
   const wattsDisplay = watts !== null ? watts : "--";
   const cadenceDisplay =
     cadence !== null ? cadence.toFixed(1).replace(/\.0$/, "") : "--";
-  const bodyWeightKgDisplay =
-    bodyWeightKg !== null ? bodyWeightKg.toFixed(1) : "--";
 
   return (
     <div className="bike-overlay">
@@ -184,25 +157,6 @@ export const BikeOverlay = () => {
         <div className="metric">
           <div className="metric__value">{cadenceDisplay}</div>
           <div className="metric__label">cadence (rpm)</div>
-        </div>
-        <div className="Metric">
-          <input className="metric_value" type="number" value={bodyWeightLbs} onChange={handleBodyWeightChange} />
-          <div className="metric_label">Weight (lbs)</div>
-        </div>
-        <div className="Metric">
-          <div className="metric_value">{bodyWeightKgDisplay}</div>
-          <div className="metric_label">Weight (kg)</div>
-        </div>
-        <div className="Metric">
-          <input
-            className="metric_value"
-            type="number"
-            step="0.1"
-            min="0"
-            value={kPower}
-            onChange={handleKPowerChange}
-          />
-          <div className="metric_label">kPower (power scale)</div>
         </div>
       </div>
       <div className="bike-overlay__controls">
