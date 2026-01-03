@@ -9,6 +9,7 @@ export const LandingPage = () => {
       <button className="landing__start" onClick={() => navigate("/game")}>
         START
       </button>
+      <div className="version-black">Made by Chase Ashton</div>
     </div>
   );
 };

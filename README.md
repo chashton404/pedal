@@ -11,13 +11,22 @@ My step was to strip it down to the bear bones. I mostly just need the logic for
 ## Why in the world would you do that?
 Well aren't you just a nosey person? Jokes. My objective is to create a game that will connecto to my stationary bike trainer. That way I can hook my bike up to the internet and race on a track similar to MarioKart. Because I mean, how dope is that? 
 
+## What is Pedal?
+Pedal is a browser-based, Mario Kart–styled bike trainer. It makes indoor biking feel like a game.
+
+## How does it work
+You can still creep forward with the “W” key, but Pedal is built for a stationary trainer (like a Wahoo KICKR Core). Turn it on, click “Connect,” pick your trainer, and it links over Web Bluetooth to stream live power and cadence. Your watts drive kart speed—the harder you pedal, the faster you go.
+
+## How it was made
+Inspired by https://github.com/mustache-dev/Mario-Kart-3.js, then forked to simplify physics, hook up a bike, and build custom tracks. The site uses React + Vite with Three.js via React Three Fiber for 3D rendering.
+
 ## TO - DO
 - [x] Get rid of drifing, multiplayer and collision logic
 - [x] Create a basic straight track
 - [x] Wire up a spline on the straight track that the Kart will follow
 - [x] Get the Kart to follow the spline
-- [ ] Add capability for bluetooth connection
-- [ ] Add logic to determine speed based on the bike pedaling
+- [x] Add capability for bluetooth connection
+- [x] Add logic to determine speed based on the bike pedaling
 - [ ] Switch the Kart model to be a bike
 - [ ] and work up from there!
 
