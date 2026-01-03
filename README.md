@@ -1,4 +1,4 @@
-# MK TRAINER
+# PEDAL
 
 DISCLAIMER : This is not a completed project, it is currently a work in progress
 
