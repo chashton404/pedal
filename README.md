@@ -27,6 +27,11 @@ Inspired by https://github.com/mustache-dev/Mario-Kart-3.js, then forked to simp
 - [x] Get the Kart to follow the spline
 - [x] Add capability for bluetooth connection
 - [x] Add logic to determine speed based on the bike pedaling
+- [ ] Add logic for laps and a timer to be able to do time trials and races
+- [ ] Add Strava integration
+- [ ] Create more tracks and give the user the option to select which one they want to ride on
+- [ ] Add customizability to the kart
+- [ ] Add Supabase to add authentication and a database for the customized karts and times for the time trials
 - [ ] Switch the Kart model to be a bike
 - [ ] and work up from there!
 
