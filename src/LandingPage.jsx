@@ -6,9 +6,14 @@ export const LandingPage = () => {
   return (
     <div className="landing">
       <div className="landing__title">PEDAL</div>
-      <button className="landing__start" onClick={() => navigate("/game")}>
-        START
-      </button>
+      <div className="landing__actions">
+        <button className="landing__start" onClick={() => navigate("/game")}>
+          START
+        </button>
+        <a href="https://youtu.be/e2mlBR0mk_w" target="_blank">
+          <button className="landing__start">WATCH THE DEMO</button>
+        </a>
+      </div>
       <div className="version-black">Made by Chase Ashton</div>
     </div>
   );

@@ -472,8 +472,10 @@ canvas{
 .landing {
   width: 100vw;
   height: 100vh;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   place-items: center;
+  justify-content: center;
   background: radial-gradient(circle at 30% 30%, #f1f1f1, #ffffff 55%), #ffffff;
   color: #0b0b0b;
   text-align: center;
@@ -510,6 +512,13 @@ canvas{
 .landing__start:active {
   transform: translateY(0);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.landing__actions {
+  padding: 48px; 
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .loading-overlay {
