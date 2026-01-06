@@ -4,6 +4,10 @@ import { useRef } from "react";
 import { CatmullRomCurve3, Vector3 } from "three";
 import { catmullRomPoints } from "./misc/trackPoints";
 import { useMemo } from "react";
+import { damp } from "three/src/math/MathUtils.js";
+import { kartSettings } from "./constants";
+import { useGameStore } from "./store";
+import { Kart } from "./models/Kart";
 
 const thinPoints = (points, minDist = 1) => {
   if (!points?.length) return [];
@@ -21,11 +25,6 @@ const thinPoints = (points, minDist = 1) => {
   }
   return thinned;
 };
-import { damp } from "three/src/math/MathUtils.js";
-import { kartSettings } from "./constants";
-import { useGameStore } from "./store";
-import { Kart } from "./models/Kart";
-
 
 //useRef gives stable containers that persist across renders without causing rerenders when they change.
 export const PlayerController = () => {
