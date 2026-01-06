@@ -29,6 +29,7 @@ Inspired by https://github.com/mustache-dev/Mario-Kart-3.js, then forked to simp
 - [x] Add logic to determine speed based on the bike pedaling
 - [x] Add button to watch a demo
 - [ ] Add logic for laps and a timer to be able to do time trials and races
+- [ ] Redo pedal logo
 - [ ] Add Strava integration
 - [ ] Create more tracks and give the user the option to select which one they want to ride on
 - [ ] Add customizability to the kart
