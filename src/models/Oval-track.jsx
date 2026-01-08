@@ -22,7 +22,7 @@ export function Track(props) {
   return (
     <group {...props} dispose={null} position={[75,-.9,-165]}>
       <mesh layers={1} name={"tube"} castShadow receiveShadow geometry={nodes.Cylinder.geometry} material={materials['Material.002']} />
-      <mesh layers={1} name={"road"} castShadow receiveShadow geometry={nodes.oval_road.geometry} material={materials.Road} />
+      <mesh ref={trackRef} layers={1} name={"road"} castShadow receiveShadow geometry={nodes.oval_road.geometry} material={materials.Road} />
       <mesh layers={1} name={"grass"} castShadow receiveShadow geometry={nodes.flat_plane.geometry} material={materials.plane} />
       <mesh layers={1} name={"finishline"} castShadow receiveShadow geometry={nodes.finish_line.geometry} material={materials.finish_line} />
       <mesh layers={1} name={"mountains"} castShadow receiveShadow geometry={nodes.Cylinder004.geometry} material={materials.snowcap_1} />
