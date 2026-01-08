@@ -41,6 +41,7 @@ export const PlayerController = () => {
   
   const pathLengthRef = useRef(pathRef.current.getLength())
   const progressRef = useRef(0)
+  const prevProgressRef = useRef(0)
 
   const [, get] = useKeyboardControls();
 
@@ -56,6 +57,10 @@ export const PlayerController = () => {
   const bikeWatts = useGameStore((state) => state.bikeWatts ?? 0);
   const bodyWeightKg = useGameStore((state) => state.bodyWeight ?? 75);
   const kPower = useGameStore((state) => state.kPower ?? 1);
+  const lapCountState = useGameStore((state) => state.lapZeroStart);
+  const startLapCount = useGameStore((state) => state.setLapZeroStart);
+  const laps = useGameStore((state) => state.lapCount);
+  const addLap = useGameStore((state) => state.setLapCount);
 
   //Camera Constants
   const tmpEye = useRef(new Vector3());
@@ -191,6 +196,20 @@ export const PlayerController = () => {
     setPlayerPosition(player.position.clone());
   }
 
+  function updateLap(player) {
+    if (lapCountState == false) {
+      if (player.position == [-29.25, 0, -35.03]) {
+        startLapCount(true)
+      }
+    }
+    else {
+      if (player.position == [-29.25, 0, -35.03]) {
+        addLap(laps + 1)
+      }
+    }
+  }
+
+
   useFrame((state, delta) => {
     if (!playerRef.current) return;
     const player = playerRef.current;
@@ -234,6 +253,7 @@ export const PlayerController = () => {
 
     updateSpeed(forward, backward, delta, watts, massKg, kPower);
     updatePlayer(player, speedRef.current, camera, kart, delta, inputDirection);
+    updateLap(player)
     getGamepad();
   });
 
