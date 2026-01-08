@@ -38,4 +38,9 @@ export const useGameStore = create((set) => ({
   // UI
   showCoordinates: true,
   setShowCoordinates: (showCoordinates) => set({ showCoordinates }),
+  // Lap Counting
+  lapZeroStart: false,
+  setLapZeroStart: (lapZeroStart) => set({ lapZeroStart }),
+  lapCount: 0,
+  setLapCount: (lapCount) => set({ lapCount }),
 }));
