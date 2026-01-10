@@ -1,5 +1,17 @@
 import { create } from "zustand";
 
+const readLapStartT = () => {
+  if (typeof window === "undefined") return 0;
+  const raw = window.localStorage.getItem("lapStartT");
+  const parsed = raw == null ? 0 : Number(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const writeLapStartT = (value) => {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem("lapStartT", String(value));
+};
+
 export const useGameStore = create((set) => ({
   playerPosition: null,
   setPlayerPosition: (position) => set({ playerPosition: position }),
@@ -43,4 +55,12 @@ export const useGameStore = create((set) => ({
   setLapZeroStart: (lapZeroStart) => set({ lapZeroStart }),
   lapCount: 0,
   setLapCount: (lapCount) => set({ lapCount }),
+  incrementLap: () => set((state) => ({ lapCount: state.lapCount + 1 })),
+  lapStartT: readLapStartT(),
+  setLapStartT: (lapStartT) => {
+    writeLapStartT(lapStartT);
+    set({ lapStartT });
+  },
+  isEditingStart: false,
+  setIsEditingStart: (isEditingStart) => set({ isEditingStart }),
 }));

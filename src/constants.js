@@ -6,3 +6,10 @@ export const kartSettings = {
   },
   weight: 10
 };
+
+const devSpeedMultiplier = Number(import.meta.env.VITE_DEV_SPEED_MULTIPLIER ?? 3);
+
+export const devFlags = {
+  enabled: import.meta.env.DEV || import.meta.env.VITE_DEV_MODE === "true",
+  speedMultiplier: Number.isFinite(devSpeedMultiplier) ? devSpeedMultiplier : 3,
+};

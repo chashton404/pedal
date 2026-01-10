@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "../store";
+import { devFlags } from "../constants";
 
 const kgToLbs = (kg) => (kg == null ? "" : kg * 2.20462);
 const lbsToKg = (lbs) => (lbs == null ? null : lbs / 2.20462);
@@ -17,6 +18,8 @@ export const SettingsPanel = () => {
 
   const kPower = useGameStore((s) => s.kPower);
   const setKPower = useGameStore((s) => s.setKPower);
+  const isEditingStart = useGameStore((s) => s.isEditingStart);
+  const setIsEditingStart = useGameStore((s) => s.setIsEditingStart);
 
   const [weightInput, setWeightInput] = useState(() =>
     bodyWeightKg ? kgToLbs(bodyWeightKg).toFixed(1) : ""
@@ -145,6 +148,29 @@ export const SettingsPanel = () => {
                   />
                 </label>
               </div>
+
+              {devFlags.enabled && (
+                <div className="settings-row">
+                  <label className="settings-label">
+                    Dev: Change start point
+                    <div className="settings-input-with-action">
+                      <input
+                        className="settings-input"
+                        type="text"
+                        value={isEditingStart ? "Click on track to set" : "Off"}
+                        readOnly
+                      />
+                      <button
+                        type="button"
+                        className="settings-edit-button"
+                        onClick={() => setIsEditingStart(!isEditingStart)}
+                      >
+                        {isEditingStart ? "Done" : "Edit"}
+                      </button>
+                    </div>
+                  </label>
+                </div>
+              )}
             </div>
           </div>
         </div>

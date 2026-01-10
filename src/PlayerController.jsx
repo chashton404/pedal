@@ -5,7 +5,7 @@ import { CatmullRomCurve3, Vector3 } from "three";
 import { catmullRomPoints } from "./misc/trackPoints";
 import { useMemo } from "react";
 import { damp } from "three/src/math/MathUtils.js";
-import { kartSettings } from "./constants";
+import { devFlags, kartSettings } from "./constants";
 import { useGameStore } from "./store";
 import { Kart } from "./models/Kart";
 
@@ -42,6 +42,7 @@ export const PlayerController = () => {
   const pathLengthRef = useRef(pathRef.current.getLength())
   const progressRef = useRef(0)
   const prevProgressRef = useRef(0)
+  const lapCooldownRef = useRef(0)
 
   const [, get] = useKeyboardControls();
 
@@ -59,8 +60,9 @@ export const PlayerController = () => {
   const kPower = useGameStore((state) => state.kPower ?? 1);
   const lapCountState = useGameStore((state) => state.lapZeroStart);
   const startLapCount = useGameStore((state) => state.setLapZeroStart);
-  const laps = useGameStore((state) => state.lapCount);
-  const addLap = useGameStore((state) => state.setLapCount);
+  const incrementLap = useGameStore((state) => state.incrementLap);
+  const lapStartT = useGameStore((state) => state.lapStartT);
+  const isEditingStart = useGameStore((state) => state.isEditingStart);
 
   //Camera Constants
   const tmpEye = useRef(new Vector3());
@@ -80,7 +82,7 @@ export const PlayerController = () => {
   };
 
   function updateSpeed(forward, backward, delta, watts, massKg, powerScale = 1) {
-    const maxSpeed = kartSettings.speed.max;
+    const maxSpeed = kartSettings.speed.max * (devFlags.enabled ? devFlags.speedMultiplier : 1);
     const minSpeed = kartSettings.speed.min;
 
     const gamepadButtons = {
@@ -174,39 +176,54 @@ export const PlayerController = () => {
     player.rotation.y = player.rotation.y + damp(0, angleDiff, 4, delta);
     kart.rotation.y = damp(kart.rotation.y, 0, 3, delta); // keep body level
   
-    //Constants for the camera
-    //Desired positions
-    const dersiredEye = cameraGroupRef.current.getWorldPosition(tmpEye.current);
-    const desiredTarget = kartRef.current.getWorldPosition(tmpTarget.current);
-    
-    // Smooth target with a clamped step
-    const maxStep = 1.5 //this can be tuned
-    toTarget.current.copy(desiredTarget).sub(smoothedTarget.current);
-    if (toTarget.current.length() > maxStep) {
-      toTarget.current.setLength(maxStep);
-    }
-    smoothedTarget.current.add(toTarget.current);
+    if (!isEditingStart) {
+      //Constants for the camera
+      //Desired positions
+      const dersiredEye = cameraGroupRef.current.getWorldPosition(tmpEye.current);
+      const desiredTarget = kartRef.current.getWorldPosition(tmpTarget.current);
 
-    // Smooth eye
-    const t = Math.min(1, 5 * delta); // tune 5
-    camera.position.lerp(dersiredEye, t)
-    camera.lookAt(smoothedTarget.current);
+      // Smooth target with a clamped step
+      const maxStep = 1.5 //this can be tuned
+      toTarget.current.copy(desiredTarget).sub(smoothedTarget.current);
+      if (toTarget.current.length() > maxStep) {
+        toTarget.current.setLength(maxStep);
+      }
+      smoothedTarget.current.add(toTarget.current);
+
+      // Smooth eye
+      const t = Math.min(1, 5 * delta); // tune 5
+      camera.position.lerp(dersiredEye, t)
+      camera.lookAt(smoothedTarget.current);
+    }
   
     // Publish position to the store (HUD/lighting)
     setPlayerPosition(player.position.clone());
   }
 
-  function updateLap(player) {
-    if (lapCountState == false) {
-      if (player.position == [-29.25, 0, -35.03]) {
-        startLapCount(true)
-      }
+  function updateLap(progress, delta, inputDirection, speed) {
+    if (isEditingStart) {
+      prevProgressRef.current = progress;
+      return;
     }
-    else {
-      if (player.position == [-29.25, 0, -35.03]) {
-        addLap(laps + 1)
+
+    lapCooldownRef.current = Math.max(0, lapCooldownRef.current - delta);
+
+    const prev = prevProgressRef.current;
+    const wrapped = progress < prev;
+    const crossedStart = wrapped
+      ? prev < lapStartT || progress >= lapStartT
+      : prev < lapStartT && progress >= lapStartT;
+    const movingForward = inputDirection > 0.1 && speed > 1;
+
+    if (crossedStart && movingForward && lapCooldownRef.current === 0) {
+      if (lapCountState === false) {
+        startLapCount(true);
       }
+      incrementLap();
+      lapCooldownRef.current = 1.0;
     }
+
+    prevProgressRef.current = progress;
   }
 
 
@@ -219,7 +236,7 @@ export const PlayerController = () => {
 
     if (!player || !cameraGroup || !kart) return;
 
-    if (!initializedCamera.current) {
+    if (!initializedCamera.current && !isEditingStart) {
       // Snap camera to follow rig on first ready frame
       const eye = cameraGroup.getWorldPosition(tmpEye.current);
       const target = kart.getWorldPosition(tmpTarget.current);
@@ -253,7 +270,7 @@ export const PlayerController = () => {
 
     updateSpeed(forward, backward, delta, watts, massKg, kPower);
     updatePlayer(player, speedRef.current, camera, kart, delta, inputDirection);
-    updateLap(player)
+    updateLap(progressRef.current, delta, inputDirection, speedRef.current)
     getGamepad();
   });
 

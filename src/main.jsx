@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
 import "./index.css";
@@ -8,9 +8,17 @@ import { BikeOverlay } from "./misc/BikeOverlay.jsx";
 import { SettingsPanel } from "./misc/SettingsPanel.jsx";
 import { HelpPanel } from "./misc/HelpPanel.jsx";
 import { LandingPage } from "./LandingPage.jsx";
+import { useGameStore } from "./store.js";
 
 const GamePage = () => {
   const navigate = useNavigate();
+  const resetLapCount = useGameStore((state) => state.setLapCount);
+  const resetLapZeroStart = useGameStore((state) => state.setLapZeroStart);
+
+  useEffect(() => {
+    resetLapCount(0);
+    resetLapZeroStart(false);
+  }, [resetLapCount, resetLapZeroStart]);
 
   return (
     <div className="canvas-container">
