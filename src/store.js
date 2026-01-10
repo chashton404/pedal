@@ -63,4 +63,16 @@ export const useGameStore = create((set) => ({
   },
   isEditingStart: false,
   setIsEditingStart: (isEditingStart) => set({ isEditingStart }),
+  isEditingMap: false,
+  setIsEditingMap: (isEditingMap) => set({ isEditingMap }),
+  trackOffset: { x: 0, y: 0, z: 0 },
+  setTrackOffset: (trackOffset) => set({ trackOffset }),
+  nudgeTrackOffset: (dx = 0, dz = 0, dy = 0) =>
+    set((state) => ({
+      trackOffset: {
+        x: state.trackOffset.x + dx,
+        y: state.trackOffset.y + dy,
+        z: state.trackOffset.z + dz,
+      },
+    })),
 }));

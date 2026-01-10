@@ -20,6 +20,8 @@ export const SettingsPanel = () => {
   const setKPower = useGameStore((s) => s.setKPower);
   const isEditingStart = useGameStore((s) => s.isEditingStart);
   const setIsEditingStart = useGameStore((s) => s.setIsEditingStart);
+  const isEditingMap = useGameStore((s) => s.isEditingMap);
+  const setIsEditingMap = useGameStore((s) => s.setIsEditingMap);
 
   const [weightInput, setWeightInput] = useState(() =>
     bodyWeightKg ? kgToLbs(bodyWeightKg).toFixed(1) : ""
@@ -163,9 +165,44 @@ export const SettingsPanel = () => {
                       <button
                         type="button"
                         className="settings-edit-button"
-                        onClick={() => setIsEditingStart(!isEditingStart)}
+                        onClick={() => {
+                          const next = !isEditingStart;
+                          setIsEditingStart(next);
+                          if (next) {
+                            setIsEditingMap(false);
+                          }
+                        }}
                       >
                         {isEditingStart ? "Done" : "Edit"}
+                      </button>
+                    </div>
+                  </label>
+                </div>
+              )}
+
+              {devFlags.enabled && (
+                <div className="settings-row">
+                  <label className="settings-label">
+                    Dev: Adjust map
+                    <div className="settings-input-with-action">
+                      <input
+                        className="settings-input"
+                        type="text"
+                        value={isEditingMap ? "Use arrows to move track" : "Off"}
+                        readOnly
+                      />
+                      <button
+                        type="button"
+                        className="settings-edit-button"
+                        onClick={() => {
+                          const next = !isEditingMap;
+                          setIsEditingMap(next);
+                          if (next) {
+                            setIsEditingStart(false);
+                          }
+                        }}
+                      >
+                        {isEditingMap ? "Done" : "Edit"}
                       </button>
                     </div>
                   </label>

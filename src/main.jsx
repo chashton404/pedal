@@ -7,6 +7,7 @@ import { CoordinateHUD } from "./misc/CoordinateHUD.jsx";
 import { BikeOverlay } from "./misc/BikeOverlay.jsx";
 import { SettingsPanel } from "./misc/SettingsPanel.jsx";
 import { HelpPanel } from "./misc/HelpPanel.jsx";
+import { MapAdjustControls } from "./misc/MapAdjustControls.jsx";
 import { LandingPage } from "./LandingPage.jsx";
 import { useGameStore } from "./store.js";
 
@@ -28,6 +29,7 @@ const GamePage = () => {
         <BikeOverlay />
         <SettingsPanel />
         <HelpPanel />
+        <MapAdjustControls />
       </Suspense>
       <button
         className="exit-button"

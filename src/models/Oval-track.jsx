@@ -4,13 +4,23 @@ Command: npx gltfjsx@6.5.3 --shadows --instance new-oval-track.glb
 Files: new-oval-track.glb [5.09MB] > /Users/chaseashton/Developer/Mario-Kart-Trainer/public/models/new-oval-track-transformed.glb [402.18KB] (92%)
 */
 
-import React, {useRef, useEffect } from 'react'
+import React, {useRef, useEffect, useMemo } from 'react'
 import { useGameStore } from '../store'
 import { useGLTF } from '@react-three/drei'
 
 export function Track(props) {
   const { nodes, materials, scene } = useGLTF('./models/oval-track-transformed.glb')
   const trackRef = useRef(null)
+  const trackOffset = useGameStore((state) => state.trackOffset)
+  const basePosition = useMemo(() => [75, -0.9, -165], [])
+  const position = useMemo(
+    () => [
+      basePosition[0] + trackOffset.x,
+      basePosition[1] + trackOffset.y,
+      basePosition[2] + trackOffset.z,
+    ],
+    [basePosition, trackOffset]
+  )
   
   const setTrackScene = useGameStore((state) => state.setTrackScene);
   useEffect(() => {
@@ -20,7 +30,7 @@ export function Track(props) {
   }, [setTrackScene])
 
   return (
-    <group {...props} dispose={null} position={[75,-.9,-165]}>
+    <group {...props} dispose={null} position={position}>
       <mesh layers={1} name={"tube"} castShadow receiveShadow geometry={nodes.Cylinder.geometry} material={materials['Material.002']} />
       <mesh ref={trackRef} layers={1} name={"road"} castShadow receiveShadow geometry={nodes.oval_road.geometry} material={materials.Road} />
       <mesh layers={1} name={"grass"} castShadow receiveShadow geometry={nodes.flat_plane.geometry} material={materials.plane} />

@@ -63,6 +63,7 @@ export const PlayerController = () => {
   const incrementLap = useGameStore((state) => state.incrementLap);
   const lapStartT = useGameStore((state) => state.lapStartT);
   const isEditingStart = useGameStore((state) => state.isEditingStart);
+  const isEditingMap = useGameStore((state) => state.isEditingMap);
 
   //Camera Constants
   const tmpEye = useRef(new Vector3());
@@ -176,7 +177,7 @@ export const PlayerController = () => {
     player.rotation.y = player.rotation.y + damp(0, angleDiff, 4, delta);
     kart.rotation.y = damp(kart.rotation.y, 0, 3, delta); // keep body level
   
-    if (!isEditingStart) {
+    if (!isEditingStart && !isEditingMap) {
       //Constants for the camera
       //Desired positions
       const dersiredEye = cameraGroupRef.current.getWorldPosition(tmpEye.current);
@@ -201,7 +202,7 @@ export const PlayerController = () => {
   }
 
   function updateLap(progress, delta, inputDirection, speed) {
-    if (isEditingStart) {
+    if (isEditingStart || isEditingMap) {
       prevProgressRef.current = progress;
       return;
     }
@@ -218,6 +219,9 @@ export const PlayerController = () => {
     if (crossedStart && movingForward && lapCooldownRef.current === 0) {
       if (lapCountState === false) {
         startLapCount(true);
+        lapCooldownRef.current = 1.0;
+        prevProgressRef.current = progress;
+        return;
       }
       incrementLap();
       lapCooldownRef.current = 1.0;
@@ -236,7 +240,7 @@ export const PlayerController = () => {
 
     if (!player || !cameraGroup || !kart) return;
 
-    if (!initializedCamera.current && !isEditingStart) {
+    if (!initializedCamera.current && !isEditingStart && !isEditingMap) {
       // Snap camera to follow rig on first ready frame
       const eye = cameraGroup.getWorldPosition(tmpEye.current);
       const target = kart.getWorldPosition(tmpTarget.current);
