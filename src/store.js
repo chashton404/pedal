@@ -53,7 +53,7 @@ export const useGameStore = create((set) => ({
   // Lap Counting
   lapZeroStart: false,
   setLapZeroStart: (lapZeroStart) => set({ lapZeroStart }),
-  lapCount: 0,
+  lapCount: -1,
   setLapCount: (lapCount) => set({ lapCount }),
   incrementLap: () => set((state) => ({ lapCount: state.lapCount + 1 })),
   lapStartT: readLapStartT(),

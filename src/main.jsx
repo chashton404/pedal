@@ -17,7 +17,7 @@ const GamePage = () => {
   const resetLapZeroStart = useGameStore((state) => state.setLapZeroStart);
 
   useEffect(() => {
-    resetLapCount(0);
+    resetLapCount(-1);
     resetLapZeroStart(false);
   }, [resetLapCount, resetLapZeroStart]);
 

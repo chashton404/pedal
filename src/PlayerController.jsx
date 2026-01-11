@@ -219,6 +219,7 @@ export const PlayerController = () => {
     if (crossedStart && movingForward && lapCooldownRef.current === 0) {
       if (lapCountState === false) {
         startLapCount(true);
+        incrementLap();
         lapCooldownRef.current = 1.0;
         prevProgressRef.current = progress;
         return;
