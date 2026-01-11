@@ -1,15 +1,29 @@
 import { create } from "zustand";
 
+const normalizeLapStartT = (value, fallback = 0) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  if (parsed < 0) return 0;
+  if (parsed > 1) return 1;
+  return parsed;
+};
+
+const defaultLapStartT = normalizeLapStartT(
+  import.meta.env.VITE_LAP_START_T ?? 0,
+  0
+);
+
 const readLapStartT = () => {
-  if (typeof window === "undefined") return 0;
+  if (typeof window === "undefined") return defaultLapStartT;
   const raw = window.localStorage.getItem("lapStartT");
-  const parsed = raw == null ? 0 : Number(raw);
-  return Number.isFinite(parsed) ? parsed : 0;
+  if (raw == null) return defaultLapStartT;
+  return normalizeLapStartT(raw, defaultLapStartT);
 };
 
 const writeLapStartT = (value) => {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem("lapStartT", String(value));
+  const normalized = normalizeLapStartT(value, defaultLapStartT);
+  window.localStorage.setItem("lapStartT", String(normalized));
 };
 
 export const useGameStore = create((set) => ({

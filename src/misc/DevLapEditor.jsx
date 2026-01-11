@@ -68,7 +68,7 @@ export const DevLapEditor = () => {
     const closestT = findClosestT(curve, event.point, 600);
     setLapStartT(closestT);
     setLapZeroStart(false);
-    setLapCount(0);
+    setLapCount(-1);
   };
 
   return (
